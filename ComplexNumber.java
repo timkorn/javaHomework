@@ -45,10 +45,10 @@ public class ComplexNumber {
                 this.im = 0;
             }
             else{
-                if(nums[0] == "i"){
+                if(nums[0].equals("i")){
                     this.im = 1;
                 }
-                else if(nums[0]=="-i"){
+                else if(nums[0].equals("-i")){
                     this.im = -1;
                 }
                 else{

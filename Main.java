@@ -1,55 +1,87 @@
 package com.metanit;
+import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.io.*;
-
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Enter the name of the input file:\n");
-        String s = sc.nextLine();
+        System.out.println("Введите имя, фамилию и отчество:\n");
+        String name = sc.nextLine();
+        System.out.println("Введите дату Вашего рождения:\n");
+        String  birth = sc.nextLine();
+        String[] n = name.split(" ");
+        String s = "неопределён";
+        char[] nameExit = new char[3];
         try {
-            File fileInp = new File(s);
-            FileReader fr = new FileReader(fileInp);
-            int[] array = new int[52];
-            int c;
-            int count = 0;
-            while ((c = fr.read()) != -1) {
-                if (c>=65 && c<=90){
-                    array[c-65]+=1;
-                }
-                if (c>=97 && c<=122){
-                    array[c-71]+=1;
+            if (n.length != 3) {
+                throw new IncorrectFormatException("Неправильное количество слов в вводе имени, фамилии и отчества. Их должно быть 3.");
+            }
+            for (int i = 0; i < 3; i++) {
+                char[] charArray = n[i].toCharArray();
+                for (int j = 0; j < charArray.length; j++) {
+                    int k = (int) (charArray[j]);
+                    if (j == 0) {
+                        if (!(k>=1040 && k<=1071)) {
+                           throw new  IncorrectFormatException("Проверьте первую букву каждого слова. Она должна быть заглавной.Язык:русский.");
+                        }
+                        nameExit[i] = charArray[j];
+                    } else {
+                        if (!(k>=1072 && k<=1103)) {
+                            throw new  IncorrectFormatException("Проверьте формат ввода.Язык:русский.");
+                        }
+                        if (i == 2 && j == charArray.length - 1) {
+                            if (!(k == 1072 || k == 1095)) {
+                                throw new NoSException("Невозможно определить пол. Отчество введено неправильно");
+                            }
+                            if (k == 1095) {
+                                s = "мужской";
+                            } else {
+                                s = "женский";
+                            }
+                        }
+                    }
                 }
             }
-            int overall = Arrays.stream(array).sum() ;
-            fr.close();
-            System.out.println("Enter the name of the output file:\n");
-            String str = sc.nextLine();
-            File fileOut = new File(str);
-            FileWriter fw = new FileWriter(fileOut);
-            BufferedWriter bufferWriter = new BufferedWriter(fw);
-            for (int i =0; i<52; i++){
-                if(i<26){
-                    bufferWriter.append((char)(i+65));
-                }
-                else{
-                    bufferWriter.append((char)(i+71));
-                }
-                bufferWriter.append(":");
-                bufferWriter.append(String.valueOf(array[i]));
-                bufferWriter.append('\n');
+            String[] f = birth.split("\\.");
+            if (f.length!=3){
+                throw new WrongDateExeption("Неправильный формат даты.");
             }
-            bufferWriter.append("Overall: ");
-            bufferWriter.append(Integer.toString(overall));
-            bufferWriter.close();
-            fw.close();
+            int[] dates = new int[3];
+            try {
+                for (int i = 0; i < 3; i++) {
+                    dates[i] = Integer.parseInt(f[i]);
+                }
+            }
+            catch(NumberFormatException x){
+                throw new WrongDateExeption("Неправильный формат даты.");
+            }
+            long years;
+            try{
+                LocalDate start = LocalDate.of(dates[2], dates[1], dates[0]);
+                LocalDate end = LocalDate.now();
+                years = ChronoUnit.YEARS.between(start, end);
+            }
+            catch(java.time.DateTimeException x){
+                throw new WrongDateExeption("Неправильный формат даты.");
+            }
+            System.out.println("ФИО:");
+            System.out.println(nameExit[0]+"."+nameExit[1]+"."+nameExit[2]);
+            System.out.println("Пол:");
+            System.out.println(s);
+            System.out.println("Возраст:");
+            System.out.println(years);
         }
-        catch(FileNotFoundException x){
-            System.out.println("File does not exist.\n");
+        catch(IncorrectFormatException x){
+            System.out.println(x.getMessage());
         }
-        catch(IOException x){
-            System.out.println("Error\n");
+        catch(NoSException x){
+            System.out.println(x.getMessage());
+        }
+        catch(WrongDateExeption x){
+            System.out.println(x.getMessage());
         }
     }
+
 }
